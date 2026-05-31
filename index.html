@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Honey Bear Adventure 🐻🍯</title>
+  <meta name="description" content="A whimsical multiplayer board game for kids to collect honey and dodge forest hazards!">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Welcome screen -->
+    <div id="welcome-screen" class="screen active">
+      <div class="welcome-card glass">
+        <h1 class="game-title">🐻 Honey Bear Adventure 🍯</h1>
+        <p class="game-subtitle">Gather honey, dodge hazards, and complete quests in the Whispering Woods!</p>
+        
+        <div class="player-selection">
+          <h3>Choose Players (2-4 players)</h3>
+          <div class="player-selector-row">
+            <button class="player-count-btn active" data-count="2">2 Players</button>
+            <button class="player-count-btn" data-count="3">3 Players</button>
+            <button class="player-count-btn" data-count="4">4 Players</button>
+          </div>
+          
+          <div class="player-names-container">
+            <div class="player-input-row" id="player-1-input">
+              <span class="token-preview token-pink">🐻</span>
+              <input type="text" value="Pink Bear" placeholder="Player 1 Name" maxlength="12">
+            </div>
+            <div class="player-input-row" id="player-2-input">
+              <span class="token-preview token-mint">🐻</span>
+              <input type="text" value="Mint Bear" placeholder="Player 2 Name" maxlength="12">
+            </div>
+            <div class="player-input-row hidden" id="player-3-input">
+              <span class="token-preview token-sunny">🐻</span>
+              <input type="text" value="Sunny Bear" placeholder="Player 3 Name" maxlength="12">
+            </div>
+            <div class="player-input-row hidden" id="player-4-input">
+              <span class="token-preview token-sky">🐻</span>
+              <input type="text" value="Sky Bear" placeholder="Player 4 Name" maxlength="12">
+            </div>
+          </div>
+        </div>
+
+        <button id="start-game-btn" class="btn btn-primary btn-large">Start Adventure! 🚀</button>
+      </div>
+    </div>
+
+    <!-- Main Game screen -->
+    <div id="game-screen" class="screen">
+      <header class="game-header glass">
+        <div class="logo">🐻 Honey Bear</div>
+        <div class="game-stats">
+          <div class="stat-bubble">
+            <span class="stat-label">Goal:</span>
+            <span class="stat-val">25 🍯</span>
+          </div>
+          <button id="toggle-audio" class="btn btn-icon">🔊</button>
+        </div>
+      </header>
+
+      <main class="game-container">
+        <!-- Board view -->
+        <div class="board-wrapper glass">
+          <div class="board-scroll-container">
+            <svg id="game-board-svg" viewBox="0 0 1000 1000">
+              <defs>
+                <linearGradient id="path-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#ffde7d" />
+                  <stop offset="100%" stop-color="#f8a5c2" />
+                </linearGradient>
+                <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+                  <feDropShadow dx="2" dy="4" stdDeviation="4" flood-opacity="0.15"/>
+                </filter>
+              </defs>
+              
+              <!-- Winding Path Line -->
+              <path id="board-trail" d="" fill="none" stroke="rgba(255, 255, 255, 0.4)" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+              <path id="board-trail-inner" d="" fill="none" stroke="url(#path-gradient)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+              
+              <!-- Spaces and Players are dynamically drawn here -->
+              <g id="spaces-group"></g>
+              <g id="players-group"></g>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Sidebar Panel -->
+        <aside class="game-sidebar">
+          <!-- Active Player Card -->
+          <div class="active-player-card glass" id="active-player-panel">
+            <h3>Current Turn</h3>
+            <div class="active-bear-display">
+              <span class="active-bear-emoji" id="active-bear-icon">🐻</span>
+              <h2 id="active-bear-name">Player Name</h2>
+            </div>
+            
+            <!-- Dice area -->
+            <div class="dice-section">
+              <div class="dice-box">
+                <div id="dice-element" class="dice">
+                  <div class="face front">1</div>
+                  <div class="face back">6</div>
+                  <div class="face right">3</div>
+                  <div class="face left">4</div>
+                  <div class="face top">2</div>
+                  <div class="face bottom">5</div>
+                </div>
+              </div>
+              <button id="roll-btn" class="btn btn-primary btn-large">Roll Dice 🎲</button>
+            </div>
+            
+            <div class="turn-instruction" id="turn-status">Roll to start your journey!</div>
+          </div>
+
+          <!-- Leaderboard / Player Jars -->
+          <div class="leaderboard glass">
+            <h3>Honey Jars</h3>
+            <div id="players-jars-list">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </aside>
+      </main>
+    </div>
+
+    <!-- Dialogs and Overlays -->
+    <dialog id="event-dialog" class="glass-modal">
+      <div class="modal-content">
+        <span class="modal-icon" id="event-icon">🌳</span>
+        <h2 id="event-title">Forest Event!</h2>
+        <p id="event-description">Something happens to your bear...</p>
+        <div class="modal-actions">
+          <button id="event-ok-btn" class="btn btn-primary">Okay!</button>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog id="minigame-dialog" class="glass-modal" closedby="none">
+      <div class="modal-content minigame-content">
+        <h2 id="minigame-title">Mini-Game Challenge!</h2>
+        <div id="minigame-container">
+          <!-- Mini-game canvas or HTML injected here -->
+        </div>
+        <div class="minigame-instruction" id="minigame-help">How to play instruction...</div>
+        <div class="modal-actions hidden" id="minigame-actions">
+          <button id="minigame-close-btn" class="btn btn-primary">Continue</button>
+        </div>
+      </div>
+    </dialog>
+    
+    <!-- Game Win Dialog -->
+    <dialog id="win-dialog" class="glass-modal" closedby="none">
+      <div class="modal-content">
+        <span class="modal-icon">👑🏆</span>
+        <h2 id="win-title">We Have a Winner!</h2>
+        <p id="win-description">Bear has filled their honey jar!</p>
+        <div class="modal-actions">
+          <button id="restart-game-btn" class="btn btn-primary">Play Again 🔄</button>
+        </div>
+      </div>
+    </dialog>
+  </div>
+
+  <script src="minigames.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
