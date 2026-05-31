@@ -199,7 +199,7 @@ class Game {
     this.diceValue = 1;
     this.isRolling = false;
     this.isMoving = false;
-    this.winningHoney = 25;
+    this.winningHoney = 50;
     
     // UI elements
     this.welcomeScreen = document.getElementById('welcome-screen');
