@@ -3,11 +3,57 @@ class SoundEngine {
   constructor() {
     this.ctx = null;
     this.muted = false;
+    this.bgmInterval = null;
   }
 
   init() {
     if (!this.ctx) {
       this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+  }
+
+  startBGM() {
+    this.init();
+    if (this.bgmInterval) return; // BGM already running
+    
+    // Soft, whimsical pentatonic arpeggio (C4, E4, F4, G4, A4, C5) for a forest theme
+    const melody = [261.63, 329.63, 349.23, 392.00, 440.00, 523.25, 440.00, 392.00];
+    let noteIdx = 0;
+    
+    this.bgmInterval = setInterval(() => {
+      if (this.muted || !this.ctx) return;
+      if (this.ctx.state === 'suspended') {
+        this.ctx.resume();
+        return;
+      }
+      
+      const t = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      
+      // Soft triangle wave for a cozy woodwind / music-box sound
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(melody[noteIdx], t);
+      
+      // Keep background music very soft
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.015, t + 0.05); // quick fade in
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.55); // long decay
+      
+      osc.start(t);
+      osc.stop(t + 0.6);
+      
+      noteIdx = (noteIdx + 1) % melody.length;
+    }, 450); // soft tempo
+  }
+
+  stopBGM() {
+    if (this.bgmInterval) {
+      clearInterval(this.bgmInterval);
+      this.bgmInterval = null;
     }
   }
 
@@ -214,6 +260,7 @@ class Game {
     // Start Game
     document.getElementById('start-game-btn').addEventListener('click', () => {
       sound.play('click');
+      sound.startBGM(); // Start loop BGM!
       this.setupGame();
     });
 
