@@ -171,6 +171,10 @@ class MiniGameManager {
           if (item.type === itemTypes.HONEY) {
             score++;
             if (window.playAudio) window.playAudio('collect');
+            if (score >= 8) {
+              endGame(true);
+              return;
+            }
           } else {
             lives--;
             if (window.playAudio) window.playAudio('sting');
