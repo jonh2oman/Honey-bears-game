@@ -682,5 +682,215 @@ class MiniGameManager {
       });
     });
   }
+
+  // --- BEE DODGER GAME ---
+  startBeeDodger() {
+    this.container.innerHTML = `<canvas id="minigame-canvas" width="500" height="375" style="display: block; width: 100%; height: 100%;"></canvas>`;
+    const canvas = document.getElementById('minigame-canvas');
+    const ctx = canvas.getContext('2d');
+
+    let timeLeft = 15; // survive 15 seconds
+    let gameActive = true;
+    let hitStung = false;
+
+    const bear = {
+      x: 60,
+      y: canvas.height / 2,
+      radius: 18,
+      speed: 6
+    };
+
+    const bees = [];
+
+    // Controls
+    let moveUp = false;
+    let moveDown = false;
+
+    const keyDownHandler = (e) => {
+      if (e.key === 'ArrowUp' || e.key === 'w') moveUp = true;
+      if (e.key === 'ArrowDown' || e.key === 's') moveDown = true;
+    };
+
+    const keyUpHandler = (e) => {
+      if (e.key === 'ArrowUp' || e.key === 'w') moveUp = false;
+      if (e.key === 'ArrowDown' || e.key === 's') moveDown = false;
+    };
+
+    const mouseMoveHandler = (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const root = document.documentElement;
+      const mouseY = e.clientY - rect.top - root.scrollTop;
+      bear.y = mouseY;
+      // Boundaries
+      if (bear.y < bear.radius) bear.y = bear.radius;
+      if (bear.y > canvas.height - bear.radius) bear.y = canvas.height - bear.radius;
+    };
+
+    const touchMoveHandler = (e) => {
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const touchY = e.touches[0].clientY - rect.top;
+      bear.y = touchY;
+      if (bear.y < bear.radius) bear.y = bear.radius;
+      if (bear.y > canvas.height - bear.radius) bear.y = canvas.height - bear.radius;
+    };
+
+    window.addEventListener('keydown', keyDownHandler);
+    window.addEventListener('keyup', keyUpHandler);
+    canvas.addEventListener('mousemove', mouseMoveHandler);
+    canvas.addEventListener('touchmove', touchMoveHandler, { passive: false });
+
+    // Spawn bees
+    const spawnInterval = setInterval(() => {
+      if (!gameActive) return;
+      bees.push({
+        x: canvas.width + 20,
+        y: Math.random() * (canvas.height - 40) + 20,
+        width: 24,
+        height: 16,
+        speed: Math.random() * 3 + 4
+      });
+    }, 400);
+
+    // Timer
+    const timerInterval = setInterval(() => {
+      if (!gameActive) return;
+      timeLeft--;
+      if (timeLeft <= 0) {
+        endGame(true);
+      }
+    }, 1000);
+
+    const endGame = (survived = false) => {
+      gameActive = false;
+      clearInterval(spawnInterval);
+      clearInterval(timerInterval);
+      window.removeEventListener('keydown', keyDownHandler);
+      window.removeEventListener('keyup', keyUpHandler);
+      canvas.removeEventListener('mousemove', mouseMoveHandler);
+
+      const penalty = survived ? 0 : -2;
+      
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 24px Fredoka';
+      ctx.textAlign = 'center';
+      
+      if (survived) {
+        ctx.fillText('🏆 Success! You dodged the bees!', canvas.width / 2, canvas.height / 2 - 20);
+        ctx.fillStyle = '#fbbf24';
+        ctx.fillText(`Keep all your honey! 🍯`, canvas.width / 2, canvas.height / 2 + 20);
+      } else {
+        ctx.fillText('💥 Ouch! You got stung!', canvas.width / 2, canvas.height / 2 - 20);
+        ctx.fillStyle = '#ef4444';
+        ctx.fillText(`Penalty: ${penalty} Honey 🍯`, canvas.width / 2, canvas.height / 2 + 20);
+      }
+
+      setTimeout(() => this.onComplete(survived, penalty), 2000);
+    };
+
+    const draw = () => {
+      if (!gameActive) return;
+
+      // Draw whimsical sky backdrop
+      ctx.fillStyle = '#bae6fd';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Clouds decoration
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(80, 60, 30, 0, Math.PI * 2);
+      ctx.arc(120, 50, 40, 0, Math.PI * 2);
+      ctx.arc(160, 60, 30, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Keyboard movement
+      if (moveUp && bear.y > bear.radius) bear.y -= bear.speed;
+      if (moveDown && bear.y < canvas.height - bear.radius) bear.y += bear.speed;
+
+      // Draw Bear Face
+      ctx.fillStyle = '#f472b6'; // Cute pink bear
+      ctx.beginPath();
+      ctx.arc(bear.x, bear.y, bear.radius, 0, Math.PI * 2);
+      ctx.fill();
+      // Ears
+      ctx.beginPath();
+      ctx.arc(bear.x - bear.radius + 4, bear.y - bear.radius + 4, 8, 0, Math.PI * 2);
+      ctx.arc(bear.x + bear.radius - 4, bear.y - bear.radius + 4, 8, 0, Math.PI * 2);
+      ctx.fill();
+      // Eyes
+      ctx.fillStyle = '#1e293b';
+      ctx.beginPath();
+      ctx.arc(bear.x - 6, bear.y - 2, 2.5, 0, Math.PI * 2);
+      ctx.arc(bear.x + 6, bear.y - 2, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+      // Snout
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(bear.x, bear.y + 6, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#000';
+      ctx.beginPath();
+      ctx.arc(bear.x, bear.y + 4, 2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Update and draw bees
+      for (let i = bees.length - 1; i >= 0; i--) {
+        const bee = bees[i];
+        bee.x -= bee.speed;
+
+        // Collision check
+        const dist = Math.hypot(bear.x - bee.x, bear.y - bee.y);
+        if (dist < bear.radius + bee.width / 2) {
+          if (window.playAudio) window.playAudio('sting');
+          endGame(false);
+          return;
+        }
+
+        // Out of bounds
+        if (bee.x < -30) {
+          bees.splice(i, 1);
+          continue;
+        }
+
+        // Draw Bee (Yellow/Black stripes)
+        ctx.fillStyle = '#eab308'; // Yellow body
+        ctx.beginPath();
+        ctx.ellipse(bee.x, bee.y, bee.width / 2, bee.height / 2, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Stripes
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(bee.x - 2, bee.y - bee.height / 2 + 1);
+        ctx.lineTo(bee.x - 2, bee.y + bee.height / 2 - 1);
+        ctx.moveTo(bee.x + 4, bee.y - bee.height / 2 + 2);
+        ctx.lineTo(bee.x + 4, bee.y + bee.height / 2 - 2);
+        ctx.stroke();
+
+        // Wings
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+        ctx.beginPath();
+        ctx.ellipse(bee.x, bee.y - 8, 4, 8, -Math.PI / 6, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // HUD
+      ctx.fillStyle = '#1e293b';
+      ctx.font = 'bold 16px Outfit';
+      ctx.textAlign = 'left';
+      ctx.fillText('🐝 Dodge the bees!', 16, 30);
+      
+      ctx.textAlign = 'right';
+      ctx.fillText(`⏱️ Time: ${timeLeft}s`, canvas.width - 16, 30);
+
+      requestAnimationFrame(draw);
+    };
+
+    draw();
+  }
 }
 

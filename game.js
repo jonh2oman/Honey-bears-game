@@ -832,7 +832,11 @@ class Game {
       };
     });
 
-    if (gameType === 'bee' || gameType === 'catcher') {
+    if (gameType === 'bee') {
+      this.minigameTitle.innerText = '🐝 Bee Dodger';
+      this.minigameHelp.innerText = 'Move your mouse/finger or use W/S (or Up/Down) keys to fly up and down. Dodge the incoming bees!';
+      manager.startBeeDodger();
+    } else if (gameType === 'catcher') {
       this.minigameTitle.innerText = '🍯 Honey Catcher';
       this.minigameHelp.innerText = 'Move your mouse/finger or Arrow keys (A/D) left and right to catch honey drops. Avoid gray rocks!';
       manager.startHoneyCatcher();
