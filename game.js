@@ -608,14 +608,14 @@ class Game {
     sound.play('roll');
     this.diceElement.classList.add('rolling');
 
-    // Simulate 3D rotation faces randomly
+    // Simulate 3D rotation faces correctly matching 1-6 indices
     const diceFaces = [
-      { x: 0, y: 0 },       // 1
-      { x: 180, y: 0 },     // 6
-      { x: 0, y: -90 },     // 3
-      { x: 0, y: 90 },      // 4
-      { x: -90, y: 0 },     // 2
-      { x: 90, y: 0 }       // 5
+      { x: 0, y: 0 },       // Index 0: rollResult = 1 -> front (1 dot)
+      { x: -90, y: 0 },     // Index 1: rollResult = 2 -> top (2 dots)
+      { x: 0, y: -90 },     // Index 2: rollResult = 3 -> right (3 dots)
+      { x: 0, y: 90 },      // Index 3: rollResult = 4 -> left (4 dots)
+      { x: 90, y: 0 },      // Index 4: rollResult = 5 -> bottom (5 dots)
+      { x: 0, y: 180 }      // Index 5: rollResult = 6 -> back (6 dots)
     ];
     
     const rollResult = Math.floor(Math.random() * 6) + 1;
