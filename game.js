@@ -646,23 +646,63 @@ class Game {
       if (movement % 2 === 0) {
         // Roll is even, we break free
         player.skunkBlocked = false;
-        this.turnStatus.innerText = `Rolled an even ${movement}! Sneaked past the Skunk!`;
+        this.turnStatus.innerHTML = `Rolled an even ${movement}! Sneaked past the Skunk!`;
+        this.executeMovement(player, movement);
       } else {
-        // Odd roll, check if they can pay honey
-        if (player.honey >= 1) {
-          player.honey--;
-          player.skunkBlocked = false;
-          this.turnStatus.innerText = `Rolled ${movement}. Paid 1 Honey to pass the Skunk!`;
-        } else {
-          // Stay blocked, lose turn
-          this.turnStatus.innerText = `Rolled ${movement}. Odd! Skunk blocks you. Next player!`;
-          sound.play('hazard');
-          setTimeout(() => this.nextTurn(), 2000);
-          return;
-        }
+        // Odd roll: show interactive decision dialog!
+        this.showSkunkDialog(player, movement);
       }
+    } else {
+      this.executeMovement(player, movement);
     }
+  }
 
+  showSkunkDialog(player, movement) {
+    this.eventTitle.innerText = 'Smelly Skunk block! 🦨';
+    this.eventIcon.innerText = '🦨';
+    this.eventDescription.innerText = `${player.name} rolled an odd number (${movement}). Would you like to pay 1 honey to pass, or stay blocked and lose your turn?`;
+    
+    // Inject choices dynamically
+    const actions = this.eventDialog.querySelector('.modal-actions');
+    actions.innerHTML = `
+      <button id="skunk-pay-btn" class="btn btn-primary" ${player.honey >= 1 ? '' : 'disabled'} style="margin-right:10px;">Pay 1 Honey 🍯</button>
+      <button id="skunk-wait-btn" class="btn btn-secondary" style="background:rgba(0,0,0,0.15); border-radius:16px; padding:12px 24px; font-weight:bold; color:var(--color-text); border:none; cursor:pointer;">Stay Blocked 🦨</button>
+    `;
+    
+    // Pay button action
+    const payBtn = this.eventDialog.querySelector('#skunk-pay-btn');
+    payBtn.onclick = () => {
+      sound.play('collect');
+      player.honey--;
+      player.skunkBlocked = false;
+      this.eventDialog.close();
+      this.restoreEventDialogButtons();
+      
+      this.turnStatus.innerText = `Paid 1 Honey to pass the Skunk! Moving ${movement} spaces.`;
+      this.executeMovement(player, movement);
+    };
+    
+    // Wait button action
+    const waitBtn = this.eventDialog.querySelector('#skunk-wait-btn');
+    waitBtn.onclick = () => {
+      sound.play('hazard');
+      this.eventDialog.close();
+      this.restoreEventDialogButtons();
+      
+      this.turnStatus.innerText = `Chose to stay blocked by the Skunk. Next player!`;
+      this.nextTurn();
+    };
+    
+    this.eventDialog.showModal();
+  }
+
+  restoreEventDialogButtons() {
+    const actions = this.eventDialog.querySelector('.modal-actions');
+    actions.innerHTML = `<button id="event-ok-btn" class="btn btn-primary">Okay!</button>`;
+    this.eventOkBtn = document.getElementById('event-ok-btn');
+  }
+
+  executeMovement(player, movement) {
     const startPos = player.position;
     let endPos = startPos + movement;
     
