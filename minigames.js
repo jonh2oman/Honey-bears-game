@@ -280,7 +280,10 @@ class MiniGameManager {
         
         // Pop animation
         berry.style.transform = 'scale(1.4)';
-        setTimeout(() => berry.remove(), 100);
+        setTimeout(() => {
+          berry.remove();
+          spawnBerry(); // Spawn replacement berry!
+        }, 100);
 
         if (score >= 10) {
           endGame(true);

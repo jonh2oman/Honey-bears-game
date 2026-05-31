@@ -34,8 +34,8 @@
 
 body {
   font-family: var(--font-body);
-  background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 50%, #fef3c7 100%);
-  background-attachment: fixed;
+  background: url('forest_bg.png') no-repeat center center fixed;
+  background-size: cover;
   color: var(--color-text);
   overflow-x: hidden;
   min-height: 100vh;
@@ -605,17 +605,47 @@ h1, h2, h3, h4 {
   animation: bounce 0.6s infinite ease-in-out;
 }
 
-/* Board Space Types Styles */
-.space-start { fill: #10b981; }
-.space-end { fill: #ef4444; }
-.space-honey-1 { fill: #fef08a; }
-.space-honey-2 { fill: #fde047; }
-.space-honey-3 { fill: #facc15; }
-.space-hazard-bee { fill: #f97316; }
-.space-hazard-skunk { fill: #6b7280; }
-.space-hazard-hunter { fill: #475569; }
-.space-hazard-mud { fill: #78350f; }
-.space-quest { fill: #a855f7; }
+/* Winding Woods Road Trail styling */
+#board-trail {
+  stroke: #5c3d2e !important; /* Dark brown mud outline */
+  stroke-width: 42px !important;
+}
+#board-trail-inner {
+  stroke: #8b5a2b !important; /* Warm sandy road center */
+  stroke-width: 32px !important;
+  stroke-dasharray: 10 8; /* Charming gravel/logs dash pattern */
+}
+
+/* Tree Stump Board Spaces styling */
+.stump-bark {
+  fill: #5c3a21; /* Dark wood bark */
+  stroke: #3d2310;
+  stroke-width: 2px;
+}
+.stump-wood {
+  fill: #e8d0b0; /* Light wood interior */
+  stroke: #5c3a21;
+  stroke-width: 1px;
+  transition: fill 0.2s, transform 0.2s;
+}
+.stump-ring {
+  fill: none;
+  stroke: #a0522d;
+  stroke-width: 1.2px;
+  opacity: 0.35;
+}
+
+/* Space Type Color Tints (applied to wood interior) */
+.space-start .stump-wood { fill: #a7f3d0; } /* Mint green start */
+.space-end .stump-wood { fill: #fca5a5; } /* Red end */
+.space-honey-1 .stump-wood { fill: #fef08a; } /* Warm yellows for honey */
+.space-honey-2 .stump-wood { fill: #fde047; }
+.space-honey-3 .stump-wood { fill: #facc15; }
+.space-hazard-bee .stump-wood { fill: #fed7aa; } /* Orange bee threat */
+.space-hazard-skunk .stump-wood { fill: #cbd5e1; } /* Light gray skunk */
+.space-hazard-hunter .stump-wood { fill: #94a3b8; } /* Slate hunter */
+.space-hazard-mud .stump-wood { fill: #c29b6e; } /* Brown mud */
+.space-quest .stump-wood { fill: #e9d5ff; } /* Purple quest */
 
 /* Responsive adjustments */
 @media (max-width: 900px) {

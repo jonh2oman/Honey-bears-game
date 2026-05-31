@@ -355,30 +355,57 @@ class Game {
     this.trailPath.setAttribute('d', d);
     this.trailPathInner.setAttribute('d', d);
 
-    // Draw space circles
+    // Draw space tree stumps
     this.spaces.forEach((space, i) => {
       const coord = this.boardCoordinates[i];
-      const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-      g.setAttribute('class', 'board-space');
+      const radius = i === 0 || i === 99 ? 34 : 26;
       
-      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      circle.setAttribute('cx', coord.x);
-      circle.setAttribute('cy', coord.y);
-      circle.setAttribute('r', i === 0 || i === 99 ? '30' : '22');
-      circle.setAttribute('class', this.getSpaceColorClass(space.type));
-      circle.setAttribute('filter', 'url(#shadow)');
+      const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      g.setAttribute('class', `board-space ${this.getSpaceColorClass(space.type)}`);
+      
+      // Bark (outer circle)
+      const bark = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      bark.setAttribute('cx', coord.x);
+      bark.setAttribute('cy', coord.y);
+      bark.setAttribute('r', radius);
+      bark.setAttribute('class', 'stump-bark');
+      bark.setAttribute('filter', 'url(#shadow)');
+      g.appendChild(bark);
+
+      // Wood face (inner circle)
+      const wood = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      wood.setAttribute('cx', coord.x);
+      wood.setAttribute('cy', coord.y);
+      wood.setAttribute('r', radius - 4);
+      wood.setAttribute('class', 'stump-wood');
+      g.appendChild(wood);
+
+      // Age ring 1
+      const ring1 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      ring1.setAttribute('cx', coord.x);
+      ring1.setAttribute('cy', coord.y);
+      ring1.setAttribute('r', (radius - 4) * 0.65);
+      ring1.setAttribute('class', 'stump-ring');
+      g.appendChild(ring1);
+
+      // Age ring 2
+      const ring2 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      ring2.setAttribute('cx', coord.x);
+      ring2.setAttribute('cy', coord.y);
+      ring2.setAttribute('r', (radius - 4) * 0.35);
+      ring2.setAttribute('class', 'stump-ring');
+      g.appendChild(ring2);
       
       const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
       text.setAttribute('x', coord.x);
-      text.setAttribute('y', coord.y + 5);
+      text.setAttribute('y', coord.y + 4);
       text.setAttribute('text-anchor', 'middle');
       text.setAttribute('font-family', 'Fredoka');
       text.setAttribute('font-weight', 'bold');
       text.setAttribute('font-size', i === 0 || i === 99 ? '12px' : '10px');
-      text.setAttribute('fill', '#fff');
+      text.setAttribute('fill', '#5c3a21'); // Dark brown text to match wood rings
       text.textContent = this.getSpaceEmoji(space);
 
-      g.appendChild(circle);
       g.appendChild(text);
       this.spacesGroup.appendChild(g);
     });
@@ -429,19 +456,19 @@ class Game {
       const offset = this.getPlayerOffset(player.id);
       g.setAttribute('transform', `translate(${coord.x + offset.x}, ${coord.y + offset.y})`);
       
-      // Token background ring
+      // Token background ring (Scaled up!)
       const ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      ring.setAttribute('r', '15');
+      ring.setAttribute('r', '28');
       ring.setAttribute('fill', player.color);
       ring.setAttribute('stroke', '#ffffff');
-      ring.setAttribute('stroke-width', '3');
+      ring.setAttribute('stroke-width', '4');
       ring.setAttribute('filter', 'url(#shadow)');
 
-      // Emoji representation
+      // Emoji representation (Scaled up!)
       const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      text.setAttribute('y', '5');
+      text.setAttribute('y', '9');
       text.setAttribute('text-anchor', 'middle');
-      text.setAttribute('font-size', '16px');
+      text.setAttribute('font-size', '28px');
       text.textContent = '🐻';
 
       g.appendChild(ring);
@@ -453,7 +480,7 @@ class Game {
   getPlayerOffset(id) {
     // Distribute overlapping bears in a circle
     const angle = (id * 2 * Math.PI) / 4;
-    const r = 14;
+    const r = 18;
     return {
       x: Math.cos(angle) * r,
       y: Math.sin(angle) * r
